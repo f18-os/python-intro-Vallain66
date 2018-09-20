@@ -17,13 +17,19 @@ shell.py works by:
 	usage `$ exit`
 	* if export is typed the program will attempt to parse the new prompt to display
 	usage `$ export PS1=<new prompt>`
+	
 	2. user input is passed to handle() which interprets command line commands by:
 	* input is split into tasks which are then executed in turn
-	4. the program forks to run commands separate from shell program
-	5. if fork is successful task comprehension begins, if output or input keywords("<", ">") are detected and the proper i/o are 		opened for use
-	6. the proper path to the program is found by iterating over all possible paths and attempting to run program using each until 		successful
-	7. logic for pipes is handled if more than one task (i.e. multiple programs) are to be run
-	8. currently the parent handles input then outputs into the pipe and the child accepts input from the pipe and outputs to STDOUT
+	
+	3. the program forks to run commands separate from shell program
+	
+	4. if fork is successful task comprehension begins, if output or input keywords("<", ">") are detected and the proper i/o are 		opened for use
+	
+	5. the proper path to the program is found by iterating over all possible paths and attempting to run program using each until 		successful
+	
+	6. logic for pipes is handled if more than one task (i.e. multiple programs) are to be run
+	
+	7. currently the parent handles input then outputs into the pipe and the child accepts input from the pipe and outputs to STDOUT
 	end
 	
 ## NOTE

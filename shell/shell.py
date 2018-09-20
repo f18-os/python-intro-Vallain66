@@ -3,6 +3,9 @@
 import os, sys, re
 
 PS1 = "$ "
+STDIN = 0
+STDOUT = 1
+
 def main():
 	os.write(1, ("Type exit to quit\n").encode())
 	while(True):
@@ -15,10 +18,12 @@ def main():
 		isexit(uinput)
 		handle(uinput)
 
+
 def isexit(str):
 	if str == "exit":
 		os.write(1, ("Goodbye...\n").encode())
 		sys.exit(0)
+
 
 def prompt(uinput):
 	if uinput.startswith("export PS1"):
@@ -31,8 +36,10 @@ def prompt(uinput):
 		print(PS1)
 		return True
 
+
 def isredirect(cmds):
 	return ">" in cmds or "<" in cmds
+
 
 def redirect(cmds):
 	if ">" in cmds:
@@ -74,39 +81,43 @@ def redirect(cmds):
 			del cmds[inind:inind+2]
 	return cmds
 
-def execute(cmds):
+
+def execute(cmd):
 	for dir in re.split(":", os.environ['PATH']): # try each directory in path
-		program = "%s/%s" % (dir, cmds[0])
+		program = "%s/%s" % (dir, cmd[0])
 		try:
-			os.execve(program, cmds, os.environ) # try to exec program
+			os.execve(program, cmd, os.environ) # try to exec program
 		except FileNotFoundError:             # ...expected
 			pass                              # ...fail quietly
 
-	os.write(2, ("Error: Could not exec %s\n" % cmds[0]).encode())
+	os.write(2, ("Error: Could not exec %s\n" % cmd[0]).encode())
 	sys.exit(1)								  # terminate with error
 
-def ispipe(cmds):
-	return "|" in cmds
+
+def ispipe(tasks):
+	return len(tasks) > 1
+
 
 def closepipe(r, w):
 	os.close(r)
 	os.close(w)
 
-#def creatpipe(cmds):
+
+def gettasks(uinput):
+	tasks = []
+	for task in re.split("\|", uinput):
+		tasks.append(task.split())
+	return tasks
+	
 
 def handle(uinput):
-	cmds = uinput.split()
-	pipe = ispipe(cmds)
-	if pipe:
-		r, w = os.pipe()
-		# remove pipe section
-		secondcmd = []
-		pipeind = cmds.index("|")
-		del cmds[pipeind]
-		secondcmd.append(cmds.pop(pipeind))
+	tasks = gettasks(uinput)
 
-		print("sec cmd: ")
-		print(secondcmd)
+	pipe = ispipe(tasks)
+	if pipe:
+		pipein, pipeout = os.pipe()
+		for fd in (pipein, pipeout):
+			os.set_inheritable(fd, True)
 
 	rc = os.fork()
 
@@ -115,28 +126,23 @@ def handle(uinput):
 	    sys.exit(1)
 
 	elif rc:        # parent (forked ok)
-		print("Parent code run")
 		if pipe:
-			os.close(r)
-			os.close(0)
-			os.dup(w)
-
-			execute(secondcmd)
+			os.close(pipeout)
+			os.dup2(pipein, STDIN)
+			execute(tasks[1])
 
 		os.wait()
-		os.write(2, ("Child is dead\n").encode())
 
 	else: # child
 		if pipe:
-			os.close(w)
-			os.close(1)
-			os.dup(r)
+			os.close(pipein)
+			os.dup2(pipeout, STDOUT)
 
 		# handles redirections
-		if isredirect(cmds):
-			cmds = redirect(cmds)
+		if isredirect(tasks[0]):
+			tasks[0] = redirect(tasks[0])
 
-		execute(cmds)
+		execute(tasks[0])
 
 	if pipe:
 		closepipe(r, w)

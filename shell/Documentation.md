@@ -11,26 +11,26 @@ UPDATED: 9/19/18
 	  ./shell.py
 
 ## PRINCIPLE OF OPERATION:
-shell.py works by:
+shell.py works by
 	
-	1. printing a prompt that sanitizes empty input, watches for keyword exit to quit program or keyworkd export to change PS1 var
+* printing a prompt that sanitizes empty input, watches for keyword exit to quit program or keyworkd export to change PS1 var
 	* if exit is typed the program will break main loop and terminate
 	usage `$ exit`
-	* if export is typed the program will attempt to parse the new prompt to display
+* if export is typed the program will attempt to parse the new prompt to display
 	usage `$ export PS1=<new prompt>`
 	
-	2. user input is passed to handle() which interprets command line commands by:
+* user input is passed to handle() which interprets command line commands by:
 	* input is split into tasks which are then executed in turn
 	
-	3. the program forks to run commands separate from shell program
+* the program forks to run commands separate from shell program
 	
-	4. if fork is successful task comprehension begins, if output or input keywords("<", ">") are detected and the proper i/o are 		opened for use
+* if fork is successful task comprehension begins, if output or input keywords("<", ">") are detected and the proper i/o are 		opened for use
 	
-	5. the proper path to the program is found by iterating over all possible paths and attempting to run program using each until 		successful
+* the proper path to the program is found by iterating over all possible paths and attempting to run program using each until 		successful
 	
-	6. logic for pipes is handled if more than one task (i.e. multiple programs) are to be run
+* logic for pipes is handled if more than one task (i.e. multiple programs) are to be run
 	
-	7. currently the parent handles input then outputs into the pipe and the child accepts input from the pipe and outputs to STDOUT
+* currently the parent handles input then outputs into the pipe and the child accepts input from the pipe and outputs to STDOUT
 	end
 	
 ## NOTE

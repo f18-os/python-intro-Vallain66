@@ -12,6 +12,7 @@ UPDATED: 9/19/18
 
 ## PRINCIPLE OF OPERATION:
 shell.py works by:
+	
 	1. printing a prompt that sanitizes empty input, watches for keyword exit to quit program or keyworkd export to change PS1 var
 	* if exit is typed the program will break main loop and terminate
 	usage `$ exit`
